@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+  <title>WHEEL</title>
+    <style>
+        .mainbox{
+			position: relative;
+			width: 500px;
+			height: 500px;
+		}
+		.mainbox:after{
+			position: absolute;
+			content: '';
+			width: 32px;
+			height: 32px;
+			background: url('arrow-left.png') no-repeat;
+			background-size: 32px;
+			right: -30px;
+			top: 50%;
+			transform: translateY(-50%);
+		}
+		.box{
+			width: 100%;
+			height: 100%;
+			position: relative;
+			border-radius: 50%;
+			border: 10px solid #fff;
+			overflow: hidden;
+			transition: all ease 5s;
+		}
+		span{
+			width: 50%;
+			height: 50%;
+			display: inline-block;
+			position: absolute;
+		}
+		.span1{
+			clip-path: polygon(0 92%, 100% 50%, 0 8%);
+			background-color: #ffeb3b;
+			top: 120px;
+			left: 0;
+		}
+		.span2{
+			clip-path: polygon(100% 92%, 0 50%, 100% 8%);
+			background-color: #e91e63;
+			top: 120px;
+			right: 0;
+		}
+		.span3{
+			clip-path: polygon(50% 0%, 8% 100%, 92% 100%);
+			background-color: #4caf50;
+			bottom: 0;
+			left: 120px;
+		}
+		.span4{
+			clip-path: polygon(50% 100%, 92% 0, 8% 0);
+			background-color: #3f51b5;
+			top: 0;
+			left: 120px;
+		}
+
+		/*Little bit adjust the value*/
+		.box1 .span3 b{
+			 transform: translate(-50%, -50%) rotate(-270deg);
+		}
+		.box1 .span1 b,
+		.box2 .span1 b{
+			transform: translate(-50%, -50%) rotate(185deg);
+		}
+		.box2 .span3 b{
+			transform: translate(-50%, -50%) rotate(90deg);
+		}
+		.box1 .span4 b,
+		.box2 .span4 b{
+			transform: translate(-50%, -50%) rotate(-85deg);
+		}
+
+		.box2{
+			width: 100%;
+			height: 100%;
+			transform: rotate(-135deg);
+		}
+		span b{
+			width: 65px;
+			height: 65px;
+			line-height: 65px;
+			border-radius: 50%;
+			font-size: 26px;
+			text-align: center;
+			background-color: #fff;
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			box-shadow: inset 0 3px 3px 0 #717171;
+		}
+		.spin{
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			width: 75px;
+			height: 75px;
+			border-radius: 50%;
+			border: 4px solid #fff;
+			background-color: #ff5722;
+			color: #fff;
+			box-shadow: 0 5px 20px #000;
+			font-weight: bold;
+			font-size: 22px;
+			cursor: pointer;
+		}
+		.spin:active{
+			width: 70px;
+			height: 70px;
+			font-size: 20px;
+		}
+
+		.mainbox.animate:after{
+			animation: animateArrow 0.7s ease infinite;
+		}
+		@keyframes animateArrow{
+			50%{
+				right: -40px;
+			}
+		}
+
+	</style>
+</head>
+
+<body>
+  <div id="app" class="container-fluid">
+    <div class="container-fluid clearfix mb-3 shadow">
+      <h1 class="h3 mb-3 font-weight-normal">WHEEL OF FORTURNE</h1>
+        <div class="mx-auto bg-warning" style="width:150px">Wheel Score : {% raw %} {{ wheelscore }} {% endraw %}</div>
+        <div style="width:150px"><p class="text-center" ><b>GUESS WORD: **********</b></p> </div>
+      <div class="float-right w-25 py-3">
+          <p class="d-inline"> <b>NAME</b> : {% raw %} {{ username }} {% endraw %} </p><br>
+        <p class="d-inline"> Your Score : {% raw %} {{ score }} {% endraw %} </p>
+      </div>
+    </div>
+    <div class="row border rounded invisible h-50 w-75 m-auto" style="font-size: 3.6rem" ref="gameboard">
+	 <div id="mainbox" class="mainbox" ref="mainbox" >
+		<div id="box" class="box" ref="box"  >
+			<div class="box1" @click="myfunction">
+				<span class="span1" data-id="50" ref="1"><b>50</b></span>
+				<span class="span2" data-id="150" ref="2"><b>150</b></span>
+				<span class="span3" data-id="250" ref="3"><b>250</b></span>
+				<span class="span4" data-id="350" ref="4"><b>350</b></span>
+			</div>
+			<div class="box2" @click="myfunction2">
+				<span class="span1" data-id="5" ref="5"><b>10</b></span>
+				<span class="span2" data-id="6" ref="6"><b>110</b></span>
+				<span class="span3" data-id="7" ref="7"><b>210</b></span>
+				<span class="span4" data-id="8" ref="8"><b>310</b></span>
+			</div>
+		</div>
+
+		<button class="spin">SPIN</button>
+	 </div>
+    </div>
+    <div class="col-4 pl-3">
+        <div class="row h-100">
+          <div class="col border h-75 text-center" style="background: rgb(114, 230, 147);">
+            <p class="my-3"> {% raw %} {{ players }} {% endraw %} online player(s) </p>
+            <hr/>
+            <li class="m-auto py-3 text-dark" style="cursor: pointer;" v-for="member in connectedPlayers" @click="choosePlayer">
+              {% raw %} {{ member }} {% endraw %}
+            </li>
+          </div>
+          <div class="w-100"></div>
+          <div class="col text-center py-3 border h-25" style="background: #b6c0ca; font-size: 1em; font-weight: bold">
+            {% raw %} {{ status }} {% endraw %}
+          </div>
+        </div>
+    </div>
+
+    </div>
+    </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  <script src="https://js.pusher.com/4.2/pusher.min.js"></script>
+  <!-- <script>
+    <script type="text/javascript">
+        const jsondata = `{{json }}`;
+  </script> -->
+  <script type="text/javascript">
+
+    var app = new Vue({
+      el: '#app',
+
+      created () {
+        let url = new URL(window.location.href);
+        let name = url.searchParams.get("username");
+        if (name) {
+          this.username = name;
+          this.subscribe();
+          this.listeners();
+        } else {
+          this.username = this.generateRandomName();
+          location.assign("/test?username=" + this.username);
+        }
+      },
+
+      data: {
+        username: '',
+        score : 0,
+        players: 0,
+        word : ['NETCENTRIC','PHYSICAL TRAINING','CACULUS'],
+        wheelscore : 0,
+        connectedPlayers: [],
+        status: '',
+       pusher: pusher = new Pusher('7ee7287be8e1a6e27c4d', {
+          authEndpoint: '/pusher/auth',
+          cluster: 'ap1',
+          encrypted: true
+        }),
+        otherPlayerName: '',
+        mychannel: {},
+        otherPlayerChannel: {},
+        firstPlayer: 0,
+        turn: 0,
+        degree : 0,
+        jsonstring:{
+            text : ["Net Centric Programing","Physical Training", "Calculus"],
+            hint : ["So harddddd", "Train your health", "Train your Logic"],
+            "key" : ["*** ******* **********","******** ********","********"]}
+      },
+
+      methods: {
+        generateRandomName: function () {
+          let text = '';
+          let possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+          for (var i = 0; i < 6; i++) {
+            text += possible.charAt(Math.floor(Math.random() * possible.length));
+          }
+
+          return text;
+        },
+
+        subscribe: function () {
+          // ----------------------------------------------------
+          // Subscribe to the presence and private channels
+          // ----------------------------------------------------
+          let channel = this.pusher.subscribe('presence-channel');
+          this.myChannel = this.pusher.subscribe('private-' + this.username)
+
+          // ----------------------------------------------------
+          // Update the number of online members on successful subscription
+          // ----------------------------------------------------
+          channel.bind('pusher:subscription_succeeded', (player) => {
+            this.players = player.count - 1
+            player.each((player) => {
+              if (player.id != this.username)
+                this.connectedPlayers.push(player.id)
+            });
+          });
+
+          // ----------------------------------------------------
+          // Display a notification when a new player comes online
+          // ----------------------------------------------------
+          channel.bind('pusher:member_added', (player) => {
+            this.players++;
+            this.connectedPlayers.push(player.id)
+          });
+
+          // ---------------------------------------------------------------
+          // Decrement the connectedPlayers array when a player disconnects
+          // ---------------------------------------------------------------
+          channel.bind('pusher:member_removed', (player) => {
+            this.players--;
+            var index = this.connectedPlayers.indexOf(player.id);
+            if (index > -1) {
+              this.connectedPlayers.splice(index, 1)
+            }
+          });
+        },
+
+        listeners: function () {
+          // ------------------------------------------------------------------------
+          // Bind to the event that requests a new game session from the other player
+          // ------------------------------------------------------------------------
+          this.pusher.bind('client-' + this.username, (message) => {
+            if (confirm('Do you want to start a game of Wheel of Fortune with ' + message)) {
+
+              this.otherPlayerName = message
+              this.otherPlayerChannel = this.pusher.subscribe('private-' + this.otherPlayerName)
+
+              this.otherPlayerChannel.bind('pusher:subscription_succeeded', () => {
+                this.otherPlayerChannel.trigger('client-game-started', this.username)
+              })
+
+              this.startGame(message)
+            } else {
+              this.otherPlayerChannel = this.pusher.subscribe('private-' + message)
+
+              this.otherPlayerChannel.bind('pusher:subscription_succeeded', () => {
+                this.otherPlayerChannel.trigger('client-game-declined', "")
+              })
+
+              this.gameDeclined()
+            }
+          })
+
+          // ----------------------------------------------------
+          // Bind to the event that starts a new game session
+          // ----------------------------------------------------
+          this.myChannel.bind('client-game-started', (message) => {
+            this.status = "Game started with " + message
+            this.$refs.gameboard.classList.remove('invisible');
+            this.firstPlayer = 1;
+            this.turn = 1;
+          })
+          // ----------------------------------------------------------
+        // ----------------------------------------------------------
+          // Bind to the event that specifies that it's a players turn
+          // ---------------------------------------------------------
+          this.myChannel.bind('client-your-turn', () => {
+            this.turn = 1;
+          })
+          // ----------------------------------------------------
+          // Bind to the event that declines a game request
+          // ----------------------------------------------------
+          this.myChannel.bind('client-game-declined', () => {
+            this.status = "Game declined"
+          })
+
+         // Update the game board with the moves of the other player
+          // ----------------------------------------------------------
+        this.myChannel.bind('client-wheel-update', () => {
+            this.$refs.box.style.transform="rotate(200deg)";
+          })
+          // ----------------------------------------------------
+          // Bind to the event informs a player that he/she lost
+          // ----------------------------------------------------
+           // ----------------------------------------------------
+          // Bind to the event informs a player that wheel rotate
+          // ----------------------------------------------------
+          this.myChannel.bind('client-wheel-score', (score) => {
+            this.wheelscore = score;
+          })
+        },
+         choosePlayer: function (e) {
+          this.otherPlayerName = e.target.innerText
+          this.otherPlayerChannel = this.pusher.subscribe('private-' + this.otherPlayerName)
+
+          this.otherPlayerChannel.bind('pusher:subscription_succeeded', () => {
+            this.otherPlayerChannel.trigger('client-' + this.otherPlayerName, this.username)
+          })
+        },
+        startGame: function (name) {
+          this.status = "Game started with " + name
+          this.$refs.gameboard.classList.remove('invisible')
+        },
+         gameDeclined: function () {
+          this.status = "Game declined"
+        },
+        myfunction : function(e) {
+        if(this.turn)
+        {
+        this.turn = 0;
+        let array = [0,1,2,3];
+	    let x = 1024; //min value
+	    let y = 9999; // max value
+
+	    let deg = Math.floor(Math.random() * (x - y)) + y;
+	    this.$refs.box.style.transform="rotate("+deg+"deg)";
+	    random= array[Math.floor(Math.random() * array.length)];
+	    this.wheelscore = e.target.innerText;
+	    this.otherPlayerChannel.trigger('client-your-turn', "")
+        this.otherPlayerChannel.trigger('client-wheel-score',  e.target.innerText);
+        this.otherPlayerChannel.trigger('client-wheel-update', '');
+        return deg;}
+        },
+        myfunction2 : function(e) {
+        if(this.turn)
+        {
+        this.turn = 0;
+        let array = [0,1,2,3];
+	    let x = 1024; //min value
+	    let y = 9999; // max value
+
+	    let deg = Math.floor(Math.random() * (x - y)) + y;
+	    this.$refs.box.style.transform="rotate("+deg+"deg)";
+	    random= array[Math.floor(Math.random() * array.length)];
+	    this.wheelscore = e.target.innerText;
+	    this.otherPlayerChannel.trigger('client-your-turn', "")
+        this.otherPlayerChannel.trigger('client-wheel-score', e.target.innerText);
+        this.otherPlayerChannel.trigger('client-wheel-update', '');
+        return deg;}
+        }
+      }
+  });
+
+</script>
+</body>
+</html>
